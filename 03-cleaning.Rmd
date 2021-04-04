@@ -1,1 +1,133 @@
 # Data transformation
+
+```{r}
+library(tidyverse)
+library(hms)
+```
+
+```{r}
+trans2019 = read.csv("data/raw/dcpc_2019_tranlevel_public-csv.csv")
+trans2019$time = str_pad(trans2019$time, 4, pad = "0")
+trans2019$time = hms(hours = as.numeric(substr(trans2019$time,1,2)), 
+                     minutes = as.numeric(substr(trans2019$time,3,4)))
+trans2019 = trans2019 %>% mutate(
+    time_interval = case_when(
+        time >= hms(hours = 0) & time < hms(hours = 4) ~ "00:00-04:00",
+        time >= hms(hours = 4) & time < hms(hours = 8) ~ "04:00-08:00",
+        time >= hms(hours = 8) & time < hms(hours = 12) ~ "08:00-12:00",
+        time >= hms(hours = 12) & time < hms(hours = 16) ~ "12:00-16:00",
+        time >= hms(hours = 16) & time < hms(hours = 20) ~ "16:00-20:00",
+        time >= hms(hours = 20) & time < hms(hours = 24) ~ "20:00-24:00"
+))
+trans2019 = trans2019 %>% mutate(
+    payment_instrument = case_when(
+        pi == 0 ~ "Multiple payment methods",
+        pi == 1 ~ "Cash",
+        pi == 2 ~ "Check",
+        pi == 3 ~ "Credit card",
+        pi == 4 ~ "Debit card",
+        pi == 5 ~ "Prepaid/gift/EBT card",
+        pi == 6 ~ "Bank account number payment",
+        pi == 7 ~ "Online banking bill payment",
+        pi == 8 ~ "Money order",
+        pi == 9 ~ "Traveler's check",
+        pi == 10 ~ "Mobile payment app",
+        pi == 11 ~ "Account-to-account transfer",
+        pi == 12 ~ "Mobile phone payment",
+        pi == 13 ~ "Other payment method",
+        pi == 14 ~ "Deduction from income",
+))
+#write_csv(trans2019, "data/clean/dcpc_2019_tranlevel_public-csv-cleaned.csv")
+```
+
+```{r}
+dfindiv = read.csv("data/raw/dcpc_2019_indlevel_public-csv.csv")
+cc1 <- as.numeric(dfindiv$cc_type_1)
+cc2 <- as.numeric(dfindiv$cc_type_2)
+cc3 <- as.numeric(dfindiv$cc_type_3)
+cc4 <- as.numeric(dfindiv$cc_type_4)
+cc5 <- as.numeric(dfindiv$cc_type_5)
+cr1 <- as.numeric(dfindiv$cc_rewards_1)
+cr2 <- as.numeric(dfindiv$cc_rewards_2)
+cr3 <- as.numeric(dfindiv$cc_rewards_3)
+cr4 <- as.numeric(dfindiv$cc_rewards_4)
+cr5 <- as.numeric(dfindiv$cc_rewards_5)
+dc1 <- as.numeric(dfindiv$dc_logo_1)
+dc2 <- as.numeric(dfindiv$dc_logo_2)
+dc3 <- as.numeric(dfindiv$dc_logo_3)
+dc4 <- as.numeric(dfindiv$dc_logo_4)
+dc5 <- as.numeric(dfindiv$dc_logo_5)
+dr1 <- as.numeric(dfindiv$dc_rewards_1)
+dr2 <- as.numeric(dfindiv$dc_rewards_2)
+dr3 <- as.numeric(dfindiv$dc_rewards_3)
+dr4 <- as.numeric(dfindiv$dc_rewards_4)
+dr5 <- as.numeric(dfindiv$dc_rewards_5)
+cc = 5-(is.na(cc1)+is.na(cc2)+is.na(cc3)+is.na(cc4)+is.na(cc5))
+cr = 5-(is.na(cr1)+is.na(cr2)+is.na(cr3)+is.na(cr4)+is.na(cr5))
+dr = 5-(is.na(dr1)+is.na(dr2)+is.na(dr3)+is.na(dr4)+is.na(dr5))
+dc = 5-(is.na(dc1)+is.na(dc2)+is.na(dc3)+is.na(dc4)+is.na(dc5))
+sonline <- as.numeric(dfindiv$shops_online)
+sonline[is.na(sonline)] <- 0
+
+pref1 <- as.numeric(dfindiv$paypref_lt10)
+pref2 <- as.numeric(dfindiv$paypref_10to25)
+pref3 <- as.numeric(dfindiv$paypref_25to50)
+pref4 <- as.numeric(dfindiv$paypref_50to100)
+pref5 <- as.numeric(dfindiv$paypref_100plus)
+prefo <- as.numeric(dfindiv$paypref_web)
+pref1[is.na(pref1)] <- 0
+pref2[is.na(pref2)] <- 0
+pref3[is.na(pref3)] <- 0
+pref4[is.na(pref4)] <- 0
+pref5[is.na(pref5)] <- 0
+prefo[is.na(prefo)] <- 0
+prefcc = (pref1==3)+(pref2==3)+(pref3==3)+(pref4==3)+(pref5==3)
+prefdc = (pref1==4)+(pref2==4)+(pref3==4)+(pref4==4)+(pref5==4)
+prefm = (pref1==10)+(pref2==10)+(pref3==10)+(pref4==10)+(pref5==10)+
+  (pref1==12)+(pref2==12)+(pref3==12)+(pref4==12)+(pref5==12)
+
+df = data.frame(cc,cr,dc,dr,sonline,prefcc,prefdc,prefm)
+#write_csv(df, "data/clean/dcpc_2019_indlevel_public-csv-cleaned-1.csv")
+```
+
+```{r}
+inddf <- read.csv(file = 'data/raw/dcpc_2019_indlevel_public-csv.csv')
+testdf <- inddf[, c('paypref_b1', 'paypref_b1_why', 'paypref_nb1', 'paypref_nb1_why', 'paypref_lt10', 'paypref_10to25', 'paypref_25to50', 'paypref_50to100', 'paypref_100plus', 'hh_size', 'income_hh', 'homeowner', 'home_value', 'home_debt', 'other_assets', 'other_debts', 'ind_weight', 'gender', 'age', 'highest_education', 'race_white', 'race_black', 'race_asian', 'race_other')]
+
+new_housholddf <- testdf[!is.na(testdf$income_hh),]
+new_housholddf <- new_housholddf[!is.na(new_housholddf$paypref_nb1),]
+
+new_housholddf$paypref_b1 <- plyr::mapvalues(new_housholddf$paypref_b1,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method"))
+
+new_housholddf$paypref_nb1 <- plyr::mapvalues(new_housholddf$paypref_nb1,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method"))
+
+new_housholddf$paypref_lt10 <- plyr::mapvalues(new_housholddf$paypref_lt10,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13,NA),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method",NA))
+
+new_housholddf$paypref_10to25 <- plyr::mapvalues(new_housholddf$paypref_10to25,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13,NA),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method",NA))
+
+new_housholddf$paypref_25to50 <- plyr::mapvalues(new_housholddf$paypref_25to50,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13,NA),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method",NA))
+
+new_housholddf$paypref_50to100 <- plyr::mapvalues(new_housholddf$paypref_50to100,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13,NA),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method",NA))
+
+new_housholddf$paypref_100plus <- plyr::mapvalues(new_housholddf$paypref_100plus,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13,NA),
+                           to = c("Cash", "Check", "Credit card", " Debit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", " Money order", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method",NA))
+
+new_housholddf$highest_education <- plyr::mapvalues(new_housholddf$highest_education,
+                           from = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16),
+                           to = c("Less than 1st grade", "1st, 2nd, 3rd, or 4th grade", "5th or 6th grade", "7th or 8th grade", "9th grade", "10th grade", "11th grade", "12 grade - no diploma", " High school graduate or GED", "Some college but no degree", "Associate degree in college - occupational or vocational program", "Associate degree in college - academic program", "Bachelors degree", "Masters degree", "Professional school degree", "Doctorate degree"))
+
+#write_csv(new_housholddf, "data/clean/dcpc_2019_indlevel_public-csv-cleaned-2.csv")
+```

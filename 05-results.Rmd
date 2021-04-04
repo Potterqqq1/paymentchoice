@@ -1,1 +1,311 @@
 # Results
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggmosaic)
+library(ggridges)
+```
+
+```{r}
+trans2019 = read.csv("data/clean/dcpc_2019_tranlevel_public-csv-cleaned.csv")
+trans2019$time_interval = factor(trans2019$time_interval)
+trans2019$payment_instrument = factor(trans2019$payment_instrument)
+trans2019$merch = factor(trans2019$merch)
+
+time_interval_payment_instrument = trans2019 %>% 
+    filter(!is.na(time_interval)) %>% 
+    filter(!is.na(payment_instrument)) %>% 
+    group_by(time_interval, payment_instrument, .drop=FALSE) %>% 
+    summarise(Freq = n())
+
+standardize = function(x) x/sum(x)
+time_interval_payment_instrument_standardized = time_interval_payment_instrument %>% 
+    group_by(time_interval) %>%
+    mutate(Standardized_Freq = standardize(Freq)) %>% ungroup()
+
+merchant_payment_instrument = trans2019 %>% 
+    filter(!is.na(merch)) %>% 
+    filter(!is.na(payment_instrument)) %>% 
+    group_by(merch, payment_instrument, .drop=FALSE) %>% 
+    summarise(Freq = n())
+
+merchant_payment_instrument_standardized = merchant_payment_instrument %>% 
+    group_by(merch) %>% 
+    mutate(Standardized_Freq = standardize(Freq)) %>% 
+    ungroup()
+
+time_interval_merchant = trans2019 %>% 
+    filter(!is.na(time_interval)) %>% 
+    filter(!is.na(merch)) %>% 
+    group_by(time_interval, merch, .drop=FALSE) %>% 
+    summarise(Freq = n())
+```
+
+```{r}
+theme_heatmap = theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.x = element_text(angle=90))
+
+ggplot(time_interval_payment_instrument, aes(payment_instrument, time_interval)) +
+    geom_tile(aes(fill=Freq), color="white") +
+    coord_equal() +
+    scale_x_discrete(breaks = time_interval_payment_instrument$payment_instrument) +
+    scale_fill_viridis_c() +
+    ylab("time interval") +
+    xlab("payment instrument") +
+    ggtitle("Heatmap for time interval versus payment instrument") +
+    theme_heatmap
+```
+
+```{r}
+theme_heatmap = theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.x = element_text(angle=90))
+
+ggplot(time_interval_payment_instrument_standardized, aes(payment_instrument, time_interval)) +
+    geom_tile(aes(fill=Standardized_Freq), color="white") +
+    coord_equal() +
+    scale_x_discrete(breaks = time_interval_payment_instrument_standardized$payment_instrument) +
+    scale_fill_viridis_c() +
+    ylab("time interval") +
+    xlab("payment instrument") +
+    ggtitle("Heatmap for time interval versus payment instrument - Standardized") +
+    theme_heatmap
+```
+
+1 - Grocery stores, convenience stores without gas stations, pharmacies
+2 - Gas stations
+3 - Sit-down restaurants and bars
+4 - Fast food restaurants, coffee shops, cafeterias, food trucks
+5 - General merchandise stores, department stores, other stores, online shopping
+6 - General services: hair dressers, auto repair, parking lots, laundry or dry cleaning, etc.
+7 - Arts, entertainment, recreation
+8 - Utilities not paid to the government: electricity, natural gas, water, sewer, trash, heating oil
+9 - Taxis, airplanes, delivery
+10 - Telephone, internet, cable or satellite tv, video or music streaming services, movie theaters
+11 - Building contractors, plumbers, electricians, HVAC, etc.
+12 - Professional services: legal, accounting, architectural services; veterinarians; photographers or photo
+     processers
+13 - Hotels, motels, RV parks, campsites
+14 - Rent for apartments, homes, or other buildings, real estate companies, property managers, etc.
+15 - Mortgage companies, credit card companies, banks, insurance companies, stock brokers, IRA funds,
+     mutual funds, credit unions, sending remittances
+16 - Can be a gift or repayment to a family member, friend, or co-worker. Can be a payment to somebody
+     who did a small job for you.
+17 - Charitable or religious donations
+18 - Hospital, doctor, dentist, nursing homes, etc.
+19 - Government taxes or fees
+20 - Schools, colleges, childcare centers
+21 - Public transportation and tolls
+```{r}
+theme_heatmap2 = theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.ticks = element_blank())
+
+ggplot(merchant_payment_instrument, aes(merch, payment_instrument)) +
+    geom_tile(aes(fill=Freq), color="white") +
+    coord_equal() +
+    scale_x_discrete(breaks = merchant_payment_instrument$merch) +
+    scale_fill_viridis_c() +
+    ylab("payment instrument") +
+    xlab("merchant") +
+    ggtitle("Heatmap for payment instrument versus merchant") +
+    theme_heatmap2
+```
+
+```{r}
+theme_heatmap2 = theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.ticks = element_blank())
+
+ggplot(merchant_payment_instrument_standardized, aes(merch, payment_instrument)) +
+    geom_tile(aes(fill=Standardized_Freq), color="white") +
+    coord_equal() +
+    scale_x_discrete(breaks = merchant_payment_instrument$merch) +
+    scale_fill_viridis_c() +
+    ylab("payment instrument") +
+    xlab("merchant") +
+    ggtitle("Heatmap for payment instrument versus merchant") +
+    theme_heatmap2
+```
+
+```{r}
+df = read.csv("data/clean/dcpc_2019_indlevel_public-csv-cleaned-1.csv")
+```
+
+```{r}
+df1 = plyr::count(df[c("cc","prefcc")])
+ggplot(df1, aes(cc, prefcc,fill=freq)) +
+scale_fill_viridis_c() +
+geom_tile(color="white")+
+coord_fixed() +
+theme_heatmap2+
+ggtitle("Preferences on Credit Cards vs Number of Credit Cards")
+```
+
+```{r}
+df$cc = as.character(df$cc)
+df$dc = as.character(df$dc)
+df$cr = as.character(df$cr)
+df$dr = as.character(df$dr)
+df$sonline = as.character(df$sonline)
+df$prefcc = as.character(df$prefcc)
+df$prefdc = as.character(df$prefcc)
+df$prefm = as.character(df$prefcc)
+ggplot(data = df) +
+geom_mosaic(aes(x = product(cc, prefcc), fill = cc))+
+scale_fill_brewer(palette="Set1") +
+ggtitle("Preferences on Credit Cards vs Number of Credit Cards")
+```
+
+```{r}
+ggplot(data = df) +
+geom_mosaic(aes(x = product(dc, prefdc), fill = dc))+
+scale_fill_brewer(palette="Set1") +
+ggtitle("Preferences on Debit Cards vs Number of Debit Cards")
+```
+
+```{r}
+ggplot(data = df) +
+geom_mosaic(aes(x = product(cr, prefcc), fill = cr))+
+scale_fill_brewer(palette="Set1") +
+ggtitle("Preferences on Credit Cards vs Rewards of Credit Cards")
+```
+
+```{r}
+ggplot(data = df) +
+geom_mosaic(aes(x = product(dr, prefdc), fill = dr))+
+scale_fill_brewer(palette="Set1") +
+ggtitle("Preferences on Debit Cards vs Rewards of Debit Cards")
+```
+
+```{r}
+ggplot(data = df) +
+geom_mosaic(aes(x = product(sonline, prefm), fill = sonline))+
+scale_fill_brewer(palette="Set1") +
+ggtitle("Preferences on Mobile Payments vs Online Shopping Habbits")
+```
+
+```{r}
+new_housholddf = read_csv("data/clean/dcpc_2019_indlevel_public-csv-cleaned-2.csv")
+
+new_housholddf$paypref_b1 <- factor(new_housholddf$paypref_b1, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method")))
+new_housholddf$paypref_nb1 <- factor(new_housholddf$paypref_nb1, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method")))
+new_housholddf$paypref_lt10 <- factor(new_housholddf$paypref_lt10, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
+new_housholddf$paypref_10to25 <- factor(new_housholddf$paypref_10to25, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
+new_housholddf$paypref_25to50 <- factor(new_housholddf$paypref_25to50, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
+new_housholddf$paypref_50to100 <- factor(new_housholddf$paypref_50to100, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
+new_housholddf$paypref_100plus <- factor(new_housholddf$paypref_100plus, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
+
+new_housholddf$highest_education <- factor(new_housholddf$highest_education, levels = rev(c("Less than 1st grade", "1st, 2nd, 3rd, or 4th grade", "5th or 6th grade", "7th or 8th grade", "9th grade", "10th grade", "11th grade", "12 grade - no diploma", " High school graduate or GED", "Some college but no degree", "Associate degree in college - occupational or vocational program", "Associate degree in college - academic program", "Bachelors degree", "Masters degree", "Professional school degree", "Doctorate degree")))
+```
+
+```{r}
+ggplot(new_housholddf, aes(x = income_hh, y = paypref_b1, fill = paypref_b1)) +
+  geom_density_ridges() +
+  scale_fill_brewer(palette="Set1") +
+  theme_ridges() + 
+  theme(legend.position = "none") 
+```
+
+```{r}
+ggplot(new_housholddf, aes(x = income_hh, y = paypref_nb1, fill = paypref_nb1)) +
+  scale_fill_brewer(palette="Set1") +
+  geom_density_ridges() +
+  theme_ridges() + 
+  theme(legend.position = "none") 
+```
+
+```{r}
+new_housholddf$income_hh <- cut(new_housholddf$income_hh, breaks = c(0, 25000, 50000, 75000, 100000, 125000, 150000, 1000000), include.lowest = TRUE)
+new_housholddf$income_hh <- factor(new_housholddf$income_hh, levels = rev(levels(new_housholddf$income_hh)))
+#head(new_housholddf)
+#levels(new_housholddf$income_hh)
+
+
+df <- new_housholddf %>% dplyr::count(paypref_b1, income_hh)
+df1 <- new_housholddf %>% dplyr::count(paypref_nb1, income_hh)
+#head(df)
+
+ggplot(df, aes(y=paypref_b1, x=n, fill=income_hh)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(df1, aes(y=paypref_nb1, x=n, fill=income_hh)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(df, aes(y=income_hh, x=n, fill=paypref_b1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(df1, aes(y=income_hh, x=n, fill=paypref_nb1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+Bill payment is the regular reception of compensation for a repeated service, like rent. People with low income tend to use cash, prepaid card or paypal to pay the bills, while people with higher income tend to use credit card or bank account to pay the bills.
+
+People with higher household income tend to use more electrionic payment such as bank account number payment and online banking bill payment to pay the bills. While people with lower household income tend to use more paper instruments such as cash, check and money order to pay the bills.
+People with higher household income tend to use more payment cards such as debit card and credit card to pay the non-bill payment. While people with lower household income tend to use more paper instruments such as cash, check and money order to pay the non-bill payment.
+
+```{r}
+agedf <- new_housholddf
+agedf$age <- cut(agedf$age, breaks = c(18, 25, 35, 45, 55, 65 , 109), include.lowest = TRUE)
+agedf$age <- factor(agedf$age, levels = rev(levels(agedf$age)))
+#str(agedf)
+
+df <- agedf %>% dplyr::count(paypref_b1, age)
+ggplot(df, aes(y=paypref_b1, x=n, fill=age)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+df1 <- agedf %>% dplyr::count(paypref_nb1, age)
+ggplot(df1, aes(y=paypref_nb1, x=n, fill=age)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(df, aes(y=age, x=n, fill=paypref_b1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(df1, aes(y=age, x=n, fill=paypref_nb1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+Younger people like to use cash, debit card, paypal and prepaid/gift/EBT card to pay the bills while older people like to use check, money order, bank account number payment and online banking bill payment.
+
+```{r}
+educationdf <- new_housholddf
+df <- educationdf %>% dplyr::count(paypref_b1, highest_education)
+df1 <- educationdf %>% dplyr::count(paypref_nb1, highest_education)
+
+ggplot(df, aes(y=highest_education, x=n, fill=paypref_b1)) + 
+  geom_bar(position = "fill", stat="identity")  +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(df1, aes(y=highest_education, x=n, fill=paypref_nb1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="Set1")
+```
+
+People with higher education level tend to use more electrionic payment such as bank account number payment and online banking bill payment to pay the bills. While people with lower education level tend to use more paper instruments such as cash, check and money order to pay the bills.
+People with higher education level tend to use more payment cards such as debit card and credit card to pay the non-bill payment. While people with lower education level tend to use more paper instruments such as cash, check and money order to pay the non-bill payment.

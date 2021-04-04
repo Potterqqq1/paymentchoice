@@ -1,1 +1,42 @@
 # Missing values
+
+```{r}
+library(tidyverse)
+library(mi)
+```
+
+```{r}
+trans2019 = read.csv("data/clean/dcpc_2019_tranlevel_public-csv-cleaned.csv")
+trans2019$time_interval = factor(trans2019$time_interval)
+trans2019$payment_instrument = factor(trans2019$payment_instrument)
+trans2019$merch = factor(trans2019$merch)
+```
+
+```{r}
+time_pi_merch = as.data.frame(trans2019 %>% select(time_interval, payment_instrument, merch))
+time_pi_merch = plyr::rename(time_pi_merch, c("time_interval" = "time", "payment_instrument" = "pi"))
+x = missing_data.frame(time_pi_merch)
+image(x)
+```
+
+```{r}
+dfindiv = read.csv("data/raw/dcpc_2019_indlevel_public-csv.csv")
+x <- missing_data.frame(dfindiv[c("paypref_lt10", "paypref_10to25","paypref_25to50", "paypref_50to100","paypref_100plus", "paypref_web", "shops_online", "cc_type_1","cc_type_2","cc_type_3","cc_type_4","cc_type_5", "cc_rewards_1","cc_rewards_2","cc_rewards_3","cc_rewards_4","cc_rewards_5", "dc_logo_1","dc_logo_2","dc_logo_3","dc_logo_4","dc_logo_5", "dc_rewards_1","dc_rewards_2","dc_rewards_3","dc_rewards_4","dc_rewards_5")])
+image(x)
+```
+
+```{r}
+testdf <- dfindiv[, c('paypref_b1', 'paypref_b1_why', 'paypref_nb1', 'paypref_nb1_why', 'paypref_lt10', 'paypref_10to25', 'paypref_25to50', 'paypref_50to100', 'paypref_100plus', 'hh_size', 'income_hh', 'homeowner', 'home_value', 'home_debt', 'other_assets', 'other_debts', 'ind_weight', 'gender', 'age', 'highest_education', 'race_white', 'race_black', 'race_asian', 'race_other')]
+
+new_testdf <- testdf[rowSums(is.na(testdf)) > 0,]
+#str(new_testdf)
+
+new_testdf1 <- testdf[is.na(testdf$income_hh),]
+#str(new_testdf1)
+x <- missing_data.frame(new_testdf[])
+image(x)
+x <- missing_data.frame(new_testdf1[])
+image(x)
+```
+
+There is a high probability that observations with income_hh missing have home_value, home_debt, other_assets, and other_debts missing. Perhaps they are people with unstable income and rent houses to live in. There are only 40 out of 3016 observations has NA household income. So we just delete them.
