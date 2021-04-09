@@ -1,3 +1,11 @@
 # Interactive component
+```{r include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
 
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+<p>Changes of payment choice over time in the age group: <select id="selectButton"></select></p>
+<div id="my_dataviz"></div>
+<script src="interactive.js"></script>
 
