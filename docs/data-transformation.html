@@ -24,7 +24,7 @@
 <meta name="author" content="Haifeng Lan, Hanjun Zhang, Haoyue Qi" />
 
 
-<meta name="date" content="2021-04-04" />
+<meta name="date" content="2021-04-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -74,7 +74,12 @@
 <li class="chapter" data-level="2" data-path="data-sources.html"><a href="data-sources.html"><i class="fa fa-check"></i><b>2</b> Data sources</a></li>
 <li class="chapter" data-level="3" data-path="data-transformation.html"><a href="data-transformation.html"><i class="fa fa-check"></i><b>3</b> Data transformation</a></li>
 <li class="chapter" data-level="4" data-path="missing-values.html"><a href="missing-values.html"><i class="fa fa-check"></i><b>4</b> Missing values</a></li>
-<li class="chapter" data-level="5" data-path="results.html"><a href="results.html"><i class="fa fa-check"></i><b>5</b> Results</a></li>
+<li class="chapter" data-level="5" data-path="results.html"><a href="results.html"><i class="fa fa-check"></i><b>5</b> Results</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="results.html"><a href="results.html#part-i.-payment-choice-and-individual-features"><i class="fa fa-check"></i><b>5.1</b> Part I. Payment choice and Individual features</a></li>
+<li class="chapter" data-level="5.2" data-path="results.html"><a href="results.html#part-ii.-payment-type-and-transaction-features"><i class="fa fa-check"></i><b>5.2</b> Part II. Payment type and Transaction features</a></li>
+<li class="chapter" data-level="5.3" data-path="results.html"><a href="results.html#part-iii.-cardholders-and-their-preferences"><i class="fa fa-check"></i><b>5.3</b> Part III. Cardholders and their preferences</a></li>
+</ul></li>
 <li class="chapter" data-level="6" data-path="interactive-component.html"><a href="interactive-component.html"><i class="fa fa-check"></i><b>6</b> Interactive component</a></li>
 <li class="chapter" data-level="7" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>7</b> Conclusion</a></li>
 <li class="divider"></li>
@@ -98,6 +103,33 @@
             <section class="normal" id="section-">
 <div id="data-transformation" class="section level1" number="3">
 <h1><span class="header-section-number">Chapter 3</span> Data transformation</h1>
+<p>We picked only the columns that will appear in our plots. For the first group of graphs, the correlation between individual features and payment instrument preferences, we selected the preferred payment instruments for bill payment, income-related properties, age, and education level. The values of education levels and payment preferences were transformed from digits to actual meanings. For example, 1 in education level is now “Less than 1st grade”. Here are the first five records of the transformed data.</p>
+<pre><code>##                    paypref_b1 income_hh homeowner home_value home_debt
+## 1                 Credit card    140000         1     330000    230000
+## 2 Online banking bill payment     50000         0         NA        NA
+## 3                       Check     61000         1     220000    184000
+## 4 Online banking bill payment     50000         1     183000         0
+## 5                       Check     25000         1     350000         0
+##   other_assets other_debts gender age      highest_education
+## 1       100000           0      1  36         Masters degree
+## 2         5000        8000      1  29     High school or GED
+## 3            0       24000      1  70 Some college/no degree
+## 4         5000         500      0  58       Bachelors degree
+## 5         5000           0      0  61 Some college/no degree</code></pre>
+<p>The second group of graphs is about the correlation between transaction time, merchant type, and payment type. The data is from the Transaction-level data set. We changed the values in the time column from actual time into time intervals (4 hours each). We also transformed the digits into the real meanings in the merchant type column. Here is a sample cleaned data from group 2.</p>
+<pre><code>##   merch payment_instrument time_interval
+## 1     4               Cash   04:00-08:00
+## 2     2        Credit card   04:00-08:00
+## 3    NA               &lt;NA&gt;          &lt;NA&gt;
+## 4    15         Debit card   00:00-04:00
+## 5     4               Cash   08:00-12:00</code></pre>
+<p>The last group is about how devices influence consumer’s payment instrument preferences. The data is from the Individual-level data set. We calculated the number of credit cards and debit cards each individual holds by the number of non-null values in the five credit card type columns. We also represented how much do individuals prefer credit cards, debit cards, and mobile payments. The extent is measured by counting the occurrences of each instrument among preferences in five different transaction amounts. Here is a sample of group 3 data.</p>
+<pre><code>##   cc cr dc sonline prefcc prefdc prefm
+## 1  1  1  1       1      4      1     0
+## 2  1  1  1       0      0      5     0
+## 3  1  1  1       0      0      1     0
+## 4  1  1  1       1      4      0     0
+## 5  1  1  1       1      0      4     0</code></pre>
 
 </div>
             </section>

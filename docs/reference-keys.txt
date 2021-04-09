@@ -3,5 +3,8 @@ data-sources
 data-transformation
 missing-values
 results
+part-i.-payment-choice-and-individual-features
+part-ii.-payment-type-and-transaction-features
+part-iii.-cardholders-and-their-preferences
 interactive-component
 conclusion

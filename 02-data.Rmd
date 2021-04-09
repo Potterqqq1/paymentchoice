@@ -1,2 +1,7 @@
 # Data sources
 
+  All group members collected a range of data sets. Among all the data sets collected, we chose the one from the Federal Bank of Atlanta (https://www.frbatlanta.org/banking-and-payments/consumer-payments/diary-of-consumer-payment-choice/?panel=2). Under Diaries tab, there are datasets about consumer payment choices for six different years. In each diary, under the Data Sets tab, there are three public-use data sets, Day-level, Individual-level, and Transaction-level. 
+
+  We used Individual-level and Transaction-level data sets for each year. The Individual-level data set records anonymous individuals' payment choices and some of their economic conditions, such as income and age. The Transaction-level data set records payment types and transaction-related information such as time in a day and merchant types. The two data sets contain 15095 rows and 111 columns, and 3016 rows and 129 columns respectively.
+  
+  We chose these two data sets because they have columns that record payment types used in transactions and payment types consumers prefer in various conditions. With over 200 features, the data sets are very informative. A drawback is that some categorical values in the data sets are recorded as digits. We need to refer to another file, the Data Codebook PDF file, in the diary to understand what each digit represents.

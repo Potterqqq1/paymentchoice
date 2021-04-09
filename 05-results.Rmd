@@ -7,6 +7,70 @@ library(ggmosaic)
 library(ggridges)
 ```
 
+## Part I. Payment choice and Individual features
+
+The individual background will highly likely influence their behaviors, including payment instrument preferences. We selected three features from the data sets to analyze, income, age, and educational level. Below is a stacked bar chart that shows the correlation between paying habits and income level. We standardized the data at each income level to better present every group's preferences.
+
+```{r}
+new_housholddf = read_csv("data/clean/dcpc_2019_indlevel_public-csv-cleaned-2.csv")
+
+new_housholddf$paypref_b1 <- factor(new_housholddf$paypref_b1, levels = rev(c("Cash","Check","Credit card","Debit card","Prepaid/gift/EBT card","Bank account number payment","Online banking bill payment","Money order","Traveler’s check","PayPal","Account-to-account transfer","Mobile phone payment","Other payment method")))
+
+new_housholddf$highest_education <- factor(new_housholddf$highest_education, levels = rev(c("Under 1st grade", "1-4 grade", "5-6 grade", "7-8 grade", "9th grade", "10th grade", "11th grade", "12 grade/no diploma", "High school or GED", "Some college/no degree", "Associate non-academic program", "Associate academic program", "Bachelors degree", "Masters degree", "Professional school", "Doctorate degree")))
+```
+
+```{r}
+new_housholddf$income_hh <- cut(new_housholddf$income_hh, breaks = c(0, 25000, 50000, 75000, 100000, 125000, 150000, 1000000), include.lowest = TRUE)
+new_housholddf$income_hh <- factor(new_housholddf$income_hh, levels = rev(levels(new_housholddf$income_hh)))
+
+df <- new_housholddf %>% dplyr::count(paypref_b1, income_hh)
+```
+
+```{r}
+ggplot(df, aes(y=income_hh, x=n, fill=paypref_b1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="RdBu")+
+  labs(title="Payment Preferences VS Income Level", x = "Percentage", y = "Income Level")
+```
+
+In the graph, we used instrument preference of bill payment. Bill payment is the regular reception of compensation for a repeated service, like rent. The graph shows a decreasing trend in cash payments and debit card payments as the income level go up. The wealthier groups tend to use credit cards and online banking bill payments more often. Besides these instruments, check and bank account number payment are also popular among all groups. These differences could be a result of different bill types, bill amounts, and merchants. For example, it is more likely to pay small amounts of bills with cash. 
+
+The next graph indicates the payment preferences of different age groups. Similarly, we used bill payment preferences and standardized the data for better presentation.
+
+
+```{r}
+agedf <- new_housholddf
+agedf$age <- cut(agedf$age, breaks = c(18, 25, 35, 45, 55, 65 , 109), include.lowest = TRUE)
+agedf$age <- factor(agedf$age, levels = rev(levels(agedf$age)))
+df <- agedf %>% dplyr::count(paypref_b1, age)
+```
+
+
+```{r}
+ggplot(df, aes(y=age, x=n, fill=paypref_b1)) + 
+  geom_bar(position = "fill", stat="identity") +
+  scale_fill_brewer(palette="RdBu")+
+  labs(title="Payment Preferences VS Age", x = "Percentage", y = "Age")
+```
+
+The result shows that payment preference does change along with age group. Cash and debit card payments are negatively correlated with age, while there is a clear positive correlation between online banking. Overall, the elders use checks more often. The general trend is similar to the last graph. A reason could be the elders are usually wealthier. A new discovery is that Paypal is more popular among teenagers. 
+
+The third graph is about preferences among people of different educational levels.
+
+```{r}
+educationdf <- new_housholddf
+df <- educationdf %>% dplyr::count(paypref_b1, highest_education)
+
+ggplot(df, aes(y=highest_education, x=n, fill=paypref_b1)) + 
+  geom_bar(position = "fill", stat="identity")  +
+  scale_fill_brewer(palette="RdBu")+
+  labs(title="Payment Preferences VS Educational Level", x = "Percentage", y = "Educational Level")
+```
+
+An outlier is the Under 1st-grade group, which only uses debit cards. The population of that group is very small so that group is not very informative. There is an overall decreasing trend in cash and debit card payments, and increasing popularity of credit card and online banking bill payments as the educational level go up. The educational level also has a certain influence on income level. Therefore, the trends are similar. 
+
+From the three stacked bar plots, we can see that cash, cards, online banking, and checks are the most popular instruments for all groups. Credit cards are more popular in the elder, higher educated, and wealthier groups while debit card and cash payments show the opposite trend. People in wealthier, elder and higher educated groups are more likely to have high-level credit cards and more access to online banking payments. 
+
 ```{r}
 trans2019 = read.csv("data/clean/dcpc_2019_tranlevel_public-csv-cleaned.csv")
 trans2019$time_interval = factor(trans2019$time_interval)
@@ -42,6 +106,10 @@ time_interval_merchant = trans2019 %>%
     summarise(Freq = n())
 ```
 
+##  Part II. Payment type and Transaction features
+
+After exploring the payment preference of various consumer groups. We want to see how people actually pay in different transactions. In Part II, we analyze how transaction time and merchant types affect payment instruments. The first heatmap shows the correlation between transaction time in a day and paying method.
+
 ```{r}
 theme_heatmap = theme_classic() +
     theme(axis.line = element_blank(),
@@ -55,9 +123,11 @@ ggplot(time_interval_payment_instrument, aes(payment_instrument, time_interval))
     scale_fill_viridis_c() +
     ylab("time interval") +
     xlab("payment instrument") +
-    ggtitle("Heatmap for time interval versus payment instrument") +
+    ggtitle("Time Interval VS Payment Instrument") +
     theme_heatmap
 ```
+
+We can see that most transactions happen in the daytime from 8 am to 8 pm. The most popular instruments are cash, credit card, and debit card. Check is not as popular as in Part I because we counted in daily payments, which are hardly done through checks. To better present how payment instruments change over time intervals, we standardized the data over each time interval in the next plot.
 
 ```{r}
 theme_heatmap = theme_classic() +
@@ -72,12 +142,31 @@ ggplot(time_interval_payment_instrument_standardized, aes(payment_instrument, ti
     scale_fill_viridis_c() +
     ylab("time interval") +
     xlab("payment instrument") +
-    ggtitle("Heatmap for time interval versus payment instrument - Standardized") +
+    ggtitle("Time Interval VS Payment Instrument - Standardized") +
     theme_heatmap
 ```
 
-Merchan number meaning:
+The heatmap demonstrates that there are changes in payment methods in different time intervals. Although generally cash and cards are the most popular, bank account number payment and online banking bill payment are as common from 00:00 to 04:00. A large portion of stores is closed at that time. Also, there can be a large impact from online shopping in this time interval. 
 
+The third graph presents the correlation between payment methods and merchant types. The data is standardized over payment types. Merchant types presented as digits in the graph. The detailed merchant types are right below the heatmap.
+
+```{r}
+theme_heatmap2 = theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.ticks = element_blank())
+
+ggplot(merchant_payment_instrument_standardized, aes(merch, payment_instrument)) +
+    geom_tile(aes(fill=Standardized_Freq), color="white") +
+    coord_equal() +
+    scale_x_discrete(breaks = merchant_payment_instrument$merch) +
+    scale_fill_viridis_c() +
+    ylab("payment instrument") +
+    xlab("merchant") +
+    ggtitle("Payment Instrument VS Merchant Type") +
+    theme_heatmap2
+```
+
+Merchant number meaning:
 1 - Grocery stores, convenience stores without gas stations, pharmacies
 
 2 - Gas stations
@@ -103,7 +192,6 @@ Merchan number meaning:
 12 - Professional services: legal, accounting, architectural services; veterinarians; photographers or photo
      processers
 
-
 13 - Hotels, motels, RV parks, campsites
 
 14 - Rent for apartments, homes, or other buildings, real estate companies, property managers, etc.
@@ -123,212 +211,70 @@ Merchan number meaning:
 20 - Schools, colleges, childcare centers
 
 21 - Public transportation and tolls
-```{r}
-theme_heatmap2 = theme_classic() +
-    theme(axis.line = element_blank(),
-          axis.ticks = element_blank())
 
-ggplot(merchant_payment_instrument, aes(merch, payment_instrument)) +
-    geom_tile(aes(fill=Freq), color="white") +
-    coord_equal() +
-    scale_x_discrete(breaks = merchant_payment_instrument$merch) +
-    scale_fill_viridis_c() +
-    ylab("payment instrument") +
-    xlab("merchant") +
-    ggtitle("Heatmap for payment instrument versus merchant") +
-    theme_heatmap2
-```
+The heatmap shows a clear correlation between payment methods and merchant types. People tend to use cash on small-amount payments and hardly on large transactions such as hotels and flight tickets. Credit cards are more popular for daily expenses like dinner or travels than for formal bills like tuition and taxes. Checks have the opposite properties to credit cards; they are used to pay for formal bills rather than frequent payments. Online banking and bank account payments are similar to checks except that they are less common than checks in in-person payment situations like donations and hospital bills.
 
-```{r}
-theme_heatmap2 = theme_classic() +
-    theme(axis.line = element_blank(),
-          axis.ticks = element_blank())
+We can see those card payments are the most commonly used among all groups of people and in all transaction situations. Therefore, we will specifically focus on card payments in Part III.
 
-ggplot(merchant_payment_instrument_standardized, aes(merch, payment_instrument)) +
-    geom_tile(aes(fill=Standardized_Freq), color="white") +
-    coord_equal() +
-    scale_x_discrete(breaks = merchant_payment_instrument$merch) +
-    scale_fill_viridis_c() +
-    ylab("payment instrument") +
-    xlab("merchant") +
-    ggtitle("Heatmap for payment instrument versus merchant") +
-    theme_heatmap2
-```
+## Part III. Cardholders and their preferences
+
+In this part, we will explore how much do cardholders prefer paying by cards, how many cards do they have and how much rewards they get from the cards. 
+
+The data is from the Individual-level data set. We calculated the number of credit cards and debit cards each individual holds by the number of non-null values in the five credit card type columns. We also represented how much do individuals prefer credit cards, debit cards, and mobile payments. The extent is measured by counting the occurrences of each instrument among preferences in five different transaction situations, $10, $10 to $25, $25 to $50, $50 to $100, and over $100.
+
+The first mosaic plot presents the correlation between the number of credit cards and cardholder's preference on paying by credit cards.
 
 ```{r}
 df = read.csv("data/clean/dcpc_2019_indlevel_public-csv-cleaned-1.csv")
-```
-
-```{r}
-df1 = plyr::count(df[c("cc","prefcc")])
-ggplot(df1, aes(cc, prefcc,fill=freq)) +
-scale_fill_viridis_c() +
-geom_tile(color="white")+
-coord_fixed() +
-theme_heatmap2+
-ggtitle("Preferences on Credit Cards vs Number of Credit Cards")
-```
-
-```{r}
 df$cc = as.character(df$cc)
 df$dc = as.character(df$dc)
 df$cr = as.character(df$cr)
-df$dr = as.character(df$dr)
 df$sonline = as.character(df$sonline)
 df$prefcc = as.character(df$prefcc)
 df$prefdc = as.character(df$prefcc)
 df$prefm = as.character(df$prefcc)
 ggplot(data = df) +
-geom_mosaic(aes(x = product(cc, prefcc), fill = cc))+
+geom_mosaic(aes(x = product(prefcc, cc), fill = prefcc))+
 scale_fill_brewer(palette="Set1") +
-ggtitle("Preferences on Credit Cards vs Number of Credit Cards")
+ggtitle("Preferences on Credit Cards vs Number of Credit Cards")+
+labs(x = "Number of credit cards", y = "Preference level on credit cards")+ 
+guides(fill=guide_legend(title="Preference level"))
 ```
+
+Credit card holders like paying by credit cards more. Consumers with a preference level of 5 increase with the number of credit cards held while people with level 0  preference decreases. However, the other levels of preference do not have an obvious trend. It is noteworthy that most people have only one credit card. In this group, almost half of consumers do not prefer credit card for daily payments at all. Almost no consumer never prefer credit cards in the 5 credit cards group. In the next graph, we will do the same exploration on debit cards. 
 
 ```{r}
 ggplot(data = df) +
-geom_mosaic(aes(x = product(dc, prefdc), fill = dc))+
+geom_mosaic(aes(x = product(prefdc, dc), fill = prefdc))+
 scale_fill_brewer(palette="Set1") +
-ggtitle("Preferences on Debit Cards vs Number of Debit Cards")
+ggtitle("Preferences on Credit Cards vs Rewards of Credit Cards")+
+labs(x = "Number of debit cards", y = "Preference level on debit cards")+ 
+guides(fill=guide_legend(title="Preference level"))
 ```
+
+It is interesting how half of people with no debit card prefer paying by debit card. We can see an overall increasing trend of level 0 preference and level 5 preference decreases as number of debit card increase. Debit cards preference shows an opposite trend to credit cards'. The reason could be that debit cards usually come with less rewards than credit cards or no reward at all. Therefore, we will see how much people prefer credit cards and the number of credit cards with reward they hold.
 
 ```{r}
 ggplot(data = df) +
-geom_mosaic(aes(x = product(cr, prefcc), fill = cr))+
+geom_mosaic(aes(x = product(prefcc,cr), fill = prefcc))+
 scale_fill_brewer(palette="Set1") +
-ggtitle("Preferences on Credit Cards vs Rewards of Credit Cards")
+ggtitle("Preferences on Credit Cards vs Rewards of Credit Cards")+
+labs(x = "Number of credit cards with reward", y = "Preference level on credit cards")+ 
+guides(fill=guide_legend(title="Preference level"))
 ```
+
+We get a very close result to the graph "Preferences on Credit Cards vs Number of Credit Cards". It indicates that almost all credit cards come with rewards. People with multiple debit cards are likely to have multiple credit cards. Therefore, since credit cards and debit cards are equally convenient, it is understandable that cardholders prefer credit cards more when they have multiple and prefer debit cards less.
+
+In the last plot, we explored the popularity of new payment method, mobile payments. We compared the preference level between online shoppers and consumers who never shopped online. 
 
 ```{r}
 ggplot(data = df) +
-geom_mosaic(aes(x = product(dr, prefdc), fill = dr))+
+geom_mosaic(aes(x = product(prefm,sonline), fill = prefm))+
 scale_fill_brewer(palette="Set1") +
-ggtitle("Preferences on Debit Cards vs Rewards of Debit Cards")
+ggtitle("Preferences on Mobile Payments vs Online Shopping Habbits")+
+labs(x = "Preference level", y = "Online shopper")+ 
+guides(fill=guide_legend(title="Preference level"))
 ```
 
-```{r}
-ggplot(data = df) +
-geom_mosaic(aes(x = product(sonline, prefm), fill = sonline))+
-scale_fill_brewer(palette="Set1") +
-ggtitle("Preferences on Mobile Payments vs Online Shopping Habbits")
-```
+We can see that most people have online shoppoing experience. It is evident that online shoppers prefer mobile payment much more than those who never shop online. There is a noteworthy difference on people with level 5 preference. 
 
-```{r}
-new_housholddf = read_csv("data/clean/dcpc_2019_indlevel_public-csv-cleaned-2.csv")
-
-new_housholddf$paypref_b1 <- factor(new_housholddf$paypref_b1, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method")))
-new_housholddf$paypref_nb1 <- factor(new_housholddf$paypref_nb1, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method")))
-new_housholddf$paypref_lt10 <- factor(new_housholddf$paypref_lt10, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
-new_housholddf$paypref_10to25 <- factor(new_housholddf$paypref_10to25, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
-new_housholddf$paypref_25to50 <- factor(new_housholddf$paypref_25to50, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
-new_housholddf$paypref_50to100 <- factor(new_housholddf$paypref_50to100, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
-new_housholddf$paypref_100plus <- factor(new_housholddf$paypref_100plus, levels = rev(c("Cash", "Check", " Money order", " Debit card", "Credit card", "Prepaid/gift/EBT card", "Bank account number payment", "Online banking bill payment", "Traveler’s check", "PayPal", "Account-to-account transfer", "Mobile phone payment", "Other payment method", NA)))
-
-new_housholddf$highest_education <- factor(new_housholddf$highest_education, levels = rev(c("Less than 1st grade", "1st, 2nd, 3rd, or 4th grade", "5th or 6th grade", "7th or 8th grade", "9th grade", "10th grade", "11th grade", "12 grade - no diploma", " High school graduate or GED", "Some college but no degree", "Associate degree in college - occupational or vocational program", "Associate degree in college - academic program", "Bachelors degree", "Masters degree", "Professional school degree", "Doctorate degree")))
-```
-
-```{r}
-ggplot(new_housholddf, aes(x = income_hh, y = paypref_b1, fill = paypref_b1)) +
-  geom_density_ridges() +
-  scale_fill_brewer(palette="Set1") +
-  theme_ridges() + 
-  theme(legend.position = "none") 
-```
-
-```{r}
-ggplot(new_housholddf, aes(x = income_hh, y = paypref_nb1, fill = paypref_nb1)) +
-  scale_fill_brewer(palette="Set1") +
-  geom_density_ridges() +
-  theme_ridges() + 
-  theme(legend.position = "none") 
-```
-
-```{r}
-new_housholddf$income_hh <- cut(new_housholddf$income_hh, breaks = c(0, 25000, 50000, 75000, 100000, 125000, 150000, 1000000), include.lowest = TRUE)
-new_housholddf$income_hh <- factor(new_housholddf$income_hh, levels = rev(levels(new_housholddf$income_hh)))
-#head(new_housholddf)
-#levels(new_housholddf$income_hh)
-
-
-df <- new_housholddf %>% dplyr::count(paypref_b1, income_hh)
-df1 <- new_housholddf %>% dplyr::count(paypref_nb1, income_hh)
-#head(df)
-
-ggplot(df, aes(y=paypref_b1, x=n, fill=income_hh)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-ggplot(df1, aes(y=paypref_nb1, x=n, fill=income_hh)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-ggplot(df, aes(y=income_hh, x=n, fill=paypref_b1)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-ggplot(df1, aes(y=income_hh, x=n, fill=paypref_nb1)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-Bill payment is the regular reception of compensation for a repeated service, like rent. People with low income tend to use cash, prepaid card or paypal to pay the bills, while people with higher income tend to use credit card or bank account to pay the bills.
-
-People with higher household income tend to use more electrionic payment such as bank account number payment and online banking bill payment to pay the bills. While people with lower household income tend to use more paper instruments such as cash, check and money order to pay the bills.
-People with higher household income tend to use more payment cards such as debit card and credit card to pay the non-bill payment. While people with lower household income tend to use more paper instruments such as cash, check and money order to pay the non-bill payment.
-
-```{r}
-agedf <- new_housholddf
-agedf$age <- cut(agedf$age, breaks = c(18, 25, 35, 45, 55, 65 , 109), include.lowest = TRUE)
-agedf$age <- factor(agedf$age, levels = rev(levels(agedf$age)))
-#str(agedf)
-
-df <- agedf %>% dplyr::count(paypref_b1, age)
-ggplot(df, aes(y=paypref_b1, x=n, fill=age)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-df1 <- agedf %>% dplyr::count(paypref_nb1, age)
-ggplot(df1, aes(y=paypref_nb1, x=n, fill=age)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-ggplot(df, aes(y=age, x=n, fill=paypref_b1)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-ggplot(df1, aes(y=age, x=n, fill=paypref_nb1)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-Younger people like to use cash, debit card, paypal and prepaid/gift/EBT card to pay the bills while older people like to use check, money order, bank account number payment and online banking bill payment.
-
-```{r}
-educationdf <- new_housholddf
-df <- educationdf %>% dplyr::count(paypref_b1, highest_education)
-df1 <- educationdf %>% dplyr::count(paypref_nb1, highest_education)
-
-ggplot(df, aes(y=highest_education, x=n, fill=paypref_b1)) + 
-  geom_bar(position = "fill", stat="identity")  +
-  scale_fill_brewer(palette="Set1")
-```
-
-```{r}
-ggplot(df1, aes(y=highest_education, x=n, fill=paypref_nb1)) + 
-  geom_bar(position = "fill", stat="identity") +
-  scale_fill_brewer(palette="Set1")
-```
-
-People with higher education level tend to use more electrionic payment such as bank account number payment and online banking bill payment to pay the bills. While people with lower education level tend to use more paper instruments such as cash, check and money order to pay the bills.
-People with higher education level tend to use more payment cards such as debit card and credit card to pay the non-bill payment. While people with lower education level tend to use more paper instruments such as cash, check and money order to pay the non-bill payment.

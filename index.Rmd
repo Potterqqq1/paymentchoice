@@ -7,3 +7,4 @@ site: bookdown::bookdown_site
 
 # Introduction
 
+From cash to cards, from cards to mobile payments, payment instruments have become more convenient in our society.  Payment methods can be influenced by many factors. Some merchants take cash only, and some transactions can only be done through online payments. It takes time for the public to get used to new payment methods. Understanding how people decide payment methods helps governments make economic plans and help merchants improve the customer shopping experience. In this project, we used annual diaries of consumer payment choice data sets for six years from the Federal Reserve Bank of Atlanta. We explored how the features of consumers and transactions affect payment types. We also demonstrated how payment instrument preferences change over time. 

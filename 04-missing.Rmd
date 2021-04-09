@@ -4,6 +4,26 @@
 library(tidyverse)
 library(mi)
 ```
+We divided the missing values into three parts, reflecting missing data in each group of graphs. The first group contains data of preferred instrument for bill payment, age, income, house value, assest, debt and educational level.
+```{r,echo=FALSE,results='hide',fig.keep='all'}
+dfindiv = read.csv("data/raw/dcpc_2019_indlevel_public-csv.csv")
+testdf <- dfindiv[, c('paypref_b1', 'income_hh', 'homeowner', 'home_value', 'home_debt', 'other_assets', 'other_debts', 'age', 'highest_education')]
+
+new_testdf <- testdf[rowSums(is.na(testdf)) > 0,]
+
+new_testdf1 <- testdf[is.na(testdf$income_hh),]
+
+x <- missing_data.frame(new_testdf[])
+image(x)
+```
+```{r, echo=FALSE,results='hide',fig.keep='all'}
+x <- missing_data.frame(new_testdf1[])
+image(x)
+```
+
+There is a high probability that observations with income_hh missing have home_value, home_debt, other_assets, and other_debts missing. Perhaps they are people with unstable income and rent houses to live in. There are only 40 out of 3016 observations that have NA household income. So we just delete them. From the first plot, we can see that a large portion of homeowners left the house debit and value blank. This information might be considered quite private.
+
+The second group is the columns of time, payment type, and merchant type of transactions from the Transaction-level data set.
 
 ```{r}
 trans2019 = read.csv("data/clean/dcpc_2019_tranlevel_public-csv-cleaned.csv")
@@ -12,31 +32,21 @@ trans2019$payment_instrument = factor(trans2019$payment_instrument)
 trans2019$merch = factor(trans2019$merch)
 ```
 
-```{r}
+```{r, echo=FALSE,results='hide',fig.keep='all'}
 time_pi_merch = as.data.frame(trans2019 %>% select(time_interval, payment_instrument, merch))
 time_pi_merch = plyr::rename(time_pi_merch, c("time_interval" = "time", "payment_instrument" = "pi"))
 x = missing_data.frame(time_pi_merch)
 image(x)
 ```
 
-```{r}
-dfindiv = read.csv("data/raw/dcpc_2019_indlevel_public-csv.csv")
-x <- missing_data.frame(dfindiv[c("paypref_lt10", "paypref_10to25","paypref_25to50", "paypref_50to100","paypref_100plus", "paypref_web", "shops_online", "cc_type_1","cc_type_2","cc_type_3","cc_type_4","cc_type_5", "cc_rewards_1","cc_rewards_2","cc_rewards_3","cc_rewards_4","cc_rewards_5", "dc_logo_1","dc_logo_2","dc_logo_3","dc_logo_4","dc_logo_5", "dc_rewards_1","dc_rewards_2","dc_rewards_3","dc_rewards_4","dc_rewards_5")])
+The missing values could be a result of cash transactions. When paying by cash, the accurate time of transaction is hard to measure. Also, some merchants do not keep track of cash transactions but all electronic transactions will be automatically recorded.
+
+The last group is preferred payment choices of consumers for transactions in six different conditions: under $10, $10 to $25, $25 to $50, $50 to $100, over $100, and online. Also, the credit card types and rewards, and debit card types and rewards. 
+
+```{r,echo=FALSE,results='hide',fig.keep='all'}
+x <- missing_data.frame(dfindiv[c("paypref_lt10", "paypref_10to25","paypref_25to50", "paypref_50to100","paypref_100plus", "shops_online", "cc_type_1","cc_type_2","cc_type_3","cc_type_4","cc_type_5", "cc_rewards_1","cc_rewards_2","cc_rewards_3","cc_rewards_4","cc_rewards_5", "dc_logo_1","dc_logo_2","dc_logo_3","dc_logo_4","dc_logo_5")])
 image(x)
 ```
 
-```{r}
-testdf <- dfindiv[, c('paypref_b1', 'paypref_b1_why', 'paypref_nb1', 'paypref_nb1_why', 'paypref_lt10', 'paypref_10to25', 'paypref_25to50', 'paypref_50to100', 'paypref_100plus', 'hh_size', 'income_hh', 'homeowner', 'home_value', 'home_debt', 'other_assets', 'other_debts', 'ind_weight', 'gender', 'age', 'highest_education', 'race_white', 'race_black', 'race_asian', 'race_other')]
+From the plot, we can see that most people do not hold more than one credit card. Debit cards are more common than credit cards. It is reasonable since many teenagers are not eligible to apply for credit cards. Also, we can see that in most records, credit card and credit card rewards miss together. Therefore, most credit cards may come with rewards.
 
-new_testdf <- testdf[rowSums(is.na(testdf)) > 0,]
-#str(new_testdf)
-
-new_testdf1 <- testdf[is.na(testdf$income_hh),]
-#str(new_testdf1)
-x <- missing_data.frame(new_testdf[])
-image(x)
-x <- missing_data.frame(new_testdf1[])
-image(x)
-```
-
-There is a high probability that observations with income_hh missing have home_value, home_debt, other_assets, and other_debts missing. Perhaps they are people with unstable income and rent houses to live in. There are only 40 out of 3016 observations has NA household income. So we just delete them.
