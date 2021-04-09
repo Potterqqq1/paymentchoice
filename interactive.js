@@ -21,13 +21,13 @@ d3.select("#selectButton")
       .text(function (d) { return d; }) // text showed in the menu
       .attr("value", function (d) { return d; }); // corresponding value returned by the button
 
-update("https://raw.githubusercontent.com/zzhj/d3percentstackbarchart/main/data/age_18-25.csv")
+update("https://raw.githubusercontent.com/Potterqqq1/paymentchoice/main/data/interactive/age_18-25.csv")
 
 d3.select("#selectButton").on("change", function(d) {
         // recover the option that has been chosen
         var selectedOption = d3.select(this).property("value")
         // run the updateChart function with this selected option
-        var datapath = "https://raw.githubusercontent.com/zzhj/d3percentstackbarchart/main/data/age_" + selectedOption + ".csv"
+        var datapath = "https://raw.githubusercontent.com/Potterqqq1/paymentchoice/main/data/interactive/age_" + selectedOption + ".csv"
         update(datapath)
     })
 
