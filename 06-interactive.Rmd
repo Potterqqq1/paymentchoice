@@ -12,4 +12,13 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 <div id="my_dataviz"></div>
 <script src="interactive.js"></script>
 
-We can see that from 2015 to 2019, paper payments like cash and checks became less popular among most groups.
+We can see that from 2015 to 2019, paper payments (cash, checks and money orders) show a overall decline among most groups. Particularly, cash payments became less popular in the group of 18-25. In the year of 2016, card payments popularity had a noticeable increase and stayed at that level for the next three years.
+
+In last section, we used data from 2019. In this interactive plot, we can see that the difference among age groups stay the same over the 5 years. Younger people tend to like paper payments more while the elders prefer cards and online payments. 
+
+
+Citation: 
+
+1. https://www.d3-graph-gallery.com/graph/barplot_stacked_percent.html
+
+2. https://www.d3-graph-gallery.com/graph/barplot_stacked_highlight.html

@@ -148,7 +148,7 @@ ggplot(time_interval_payment_instrument_standardized, aes(payment_instrument, ti
 
 The heatmap demonstrates that there are changes in payment methods in different time intervals. Although generally cash and cards are the most popular, bank account number payment and online banking bill payment are as common from 00:00 to 04:00. A large portion of stores is closed at that time. Also, there can be a large impact from online shopping in this time interval. 
 
-The third graph presents the correlation between payment methods and merchant types. The data is standardized over payment types. Merchant types presented as digits in the graph. The detailed merchant types are right below the heatmap.
+The third graph presents the correlation between payment methods and merchant types. The data is standardized over merchant types. Merchant types presented as digits in the graph. The detailed merchant types are right below the heatmap. 
 
 ```{r}
 theme_heatmap2 = theme_classic() +

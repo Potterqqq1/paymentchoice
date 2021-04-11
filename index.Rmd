@@ -1,6 +1,6 @@
 --- 
 title: "Payment Choice"
-author: "Haifeng Lan, Hanjun Zhang, Haoyue Qi"
+author: "Haifeng Lan, Hanjuan Zhang, Haoyue Qi"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 ---
